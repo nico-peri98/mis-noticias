@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EL DIARIO">
+<meta name="theme-color" content="#0c0c0c">
+<title>EL DIARIO · Mis Noticias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c0c;
+    --bg-elev:#161616;
+    --bg-card:#1c1c1c;
+    --bg-card-hover:#222;
+    --border:#2a2a2a;
+    --border-bright:#3a3a3a;
+    --text:#f5f1e8;
+    --text-dim:#a8a39a;
+    --text-muted:#6a655d;
+    --accent:#d4a574;
+    --accent-bright:#e8b985;
+    --accent-soft:rgba(212,165,116,0.12);
+    --red:#c1121f;
+    --red-bright:#e63946;
+    --safe-top:env(safe-area-inset-top, 0px);
+    --safe-bot:env(safe-area-inset-bottom, 0px);
+  }
+  
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
+  
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  
+  body{
+    min-height:100vh;
+    padding-top:var(--safe-top);
+    padding-bottom:var(--safe-bot);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(212,165,116,0.08), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(193,18,31,0.06), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 60%);
+    background-attachment:fixed;
+    position:relative;
+  }
+  
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity:0.04;
+    pointer-events:none;
+    z-index:1;
+    mix-blend-mode:overlay;
+  }
+  
+  .masthead{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(12,12,12,0.85);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:1px solid var(--border);
+    padding-top:var(--safe-top);
+  }
+  
+  .masthead-inner{
+    max-width:1400px;
+    margin:0 auto;
+    padding:1.25rem 1.5rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+  }
+  
+  .brand{display:flex; align-items:center; gap:0.75rem;}
+  
+  .brand-mark{
+    width:42px; height:42px;
+    background:linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
+    display:flex; align-items:center; justify-content:center;
+    border-radius:2px; position:relative; overflow:hidden;
+  }
+  
+  .brand-mark::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.2) 100%);
+  }
+  
+  .brand-mark span{
+    font-family:'Playfair Display', serif;
+    font-weight:900; font-style:italic;
+    color:var(--bg); font-size:1.5rem; z-index:1;
+  }
+  
+  .brand-text h1{
+    font-family:'Playfair Display', serif;
+    font-size:1.5rem; font-weight:900;
+    letter-spacing:-0.02em; line-height:1;
+  }
+  
+  .brand-text .subtitle{
+    font-size:0.625rem; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:0.2em;
+    margin-top:2px; font-weight:500;
+  }
+  
+  .header-actions{display:flex; align-items:center; gap:1rem;}
+  
+  .live-indicator{
+    display:flex; align-items:center; gap:0.5rem;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.7rem; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.1em;
+  }
+  
+  .live-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--red-bright); animation:pulse 2s infinite;
+  }
+  
+  @keyframes pulse{
+    0%,100%{opacity:1; transform:scale(1);}
+    50%{opacity:0.5; transform:scale(0.85);}
+  }
+  
+  .refresh-btn{
+    background:transparent; border:1px solid var(--border-bright);
+    color:var(--text); padding:0.5rem 0.875rem;
+    font-family:'Inter', sans-serif; font-size:0.75rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.08em;
+    cursor:pointer; border-radius:2px;
+    transition:all 0.2s ease;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  
+  .refresh-btn:hover{
+    background:var(--accent); color:var(--bg); border-color:var(--accent);
+  }
+  
+  .refresh-btn:active{transform:scale(0.96);}
+  
+  .hero{
+    max-width:1400px; margin:0 auto;
+    padding:3rem 1.5rem 2rem;
+    position:relative; z-index:2;
+  }
+  
+  .hero-date{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem; color:var(--accent);
+    text-transform:uppercase; letter-spacing:0.2em;
+    margin-bottom:1rem;
+    display:flex; align-items:center; gap:0.75rem;
+  }
+  
+  .hero-date::before{
+    content:''; width:30px; height:1px; background:var(--accent);
+  }
+  
+  .hero-title{
+    font-family:'Playfair Display', serif;
+    font-size:clamp(2.5rem, 6vw, 4.5rem);
+    font-weight:900; line-height:0.95;
+    letter-spacing:-0.03em; margin-bottom:1rem;
+  }
+  
+  .hero-title em{
+    font-style:italic; color:var(--accent); font-weight:400;
+  }
+  
+  .hero-subtitle{
+    font-size:1rem; color:var(--text-dim);
+    max-width:600px; line-height:1.6; font-weight:300;
+  }
+  
+  .hero-stats{
+    display:flex; gap:2rem; margin-top:2rem;
+    padding-top:2rem; border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  
+  .stat{display:flex; flex-direction:column; gap:0.25rem;}
+  
+  .stat-number{
+    font-family:'Playfair Display', serif;
+    font-size:2rem; font-weight:900;
+    color:var(--accent); line-height:1;
+  }
+  
+  .stat-label{
+    font-size:0.7rem; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:0.15em;
+    font-weight:500;
+  }
+  
+  .tabs{
+    position:sticky;
+    top:calc(76px + var(--safe-top));
+    z-index:40;
+    background:rgba(12,12,12,0.92);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    padding:0 1.5rem;
+  }
+  
+  .tabs-inner{
+    max-width:1400px; margin:0 auto;
+    display:flex; gap:0;
+    overflow-x:auto; scrollbar-width:none;
+  }
+  
+  .tabs-inner::-webkit-scrollbar{display:none;}
+  
+  .tab{
+    background:none; border:none;
+    color:var(--text-muted);
+    padding:1rem 1.25rem;
+    font-family:'Inter', sans-serif;
+    font-size:0.8rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.1em;
+    cursor:pointer; transition:color 0.2s ease;
+    position:relative; white-space:nowrap; flex-shrink:0;
+  }
+  
+  .tab:hover{color:var(--text-dim);}
+  .tab.active{color:var(--accent);}
+  
+  .tab.active::after{
+    content:''; position:absolute;
+    bottom:-1px; left:1.25rem; right:1.25rem;
+    height:2px; background:var(--accent);
+  }
+  
+  .tab-count{
+    display:inline-block; margin-left:0.5rem;
+    background:var(--bg-card); color:var(--text-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.65rem; padding:2px 6px;
+    border-radius:2px; font-weight:700;
+  }
+  
+  .tab.active .tab-count{background:var(--accent); color:var(--bg);}
+  
+  main{
+    max-width:1400px; margin:0 auto;
+    padding:2rem 1.5rem 4rem;
+    position:relative; z-index:2;
+  }
+  
+  .section{display:none; animation:fadeIn 0.4s ease;}
+  .section.active{display:block;}
+  
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  
+  .section-header{
+    margin-bottom:2rem;
+    display:flex; align-items:flex-end;
+    justify-content:space-between;
+    gap:1rem; flex-wrap:wrap;
+  }
+  
+  .section-title-block{flex:1; min-width:0;}
+  
+  .section-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.7rem; color:var(--accent);
+    text-transform:uppercase; letter-spacing:0.2em;
+    margin-bottom:0.5rem;
+  }
+  
+  .section-title{
+    font-family:'Playfair Display', serif;
+    font-size:clamp(1.75rem, 4vw, 2.75rem);
+    font-weight:900; letter-spacing:-0.02em; line-height:1;
+  }
+  
+  .section-meta{
+    font-size:0.75rem; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:0.1em;
+    font-family:'JetBrains Mono', monospace;
+  }
+  
+  .papers-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+    gap:1.25rem;
+  }
+  
+  .paper{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:4px; overflow:hidden;
+    transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+  
+  .paper::before{
+    content:''; position:absolute;
+    top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, var(--accent), transparent);
+    opacity:0; transition:opacity 0.3s ease;
+  }
+  
+  .paper:hover{
+    border-color:var(--border-bright);
+    transform:translateY(-2px);
+    box-shadow:0 12px 40px rgba(0,0,0,0.4);
+  }
+  
+  .paper:hover::before{opacity:1;}
+  
+  .paper-header{
+    padding:1.25rem 1.25rem 1rem;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center;
+    justify-content:space-between; gap:0.75rem;
+  }
+  
+  .paper-name-block{flex:1; min-width:0;}
+  
+  .paper-name{
+    font-family:'Playfair Display', serif;
+    font-size:1.125rem; font-weight:700;
+    letter-spacing:-0.01em; margin-bottom:0.25rem;
+    overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  
+  .paper-tag{
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.6rem; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:0.15em;
+    font-weight:600;
+  }
+  
+  .paper-icon{
+    width:36px; height:36px;
+    border:1px solid var(--border);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; background:var(--bg-elev);
+    transition:all 0.2s ease;
+  }
+  
+  .paper:hover .paper-icon{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+  }
+  
+  .paper-icon svg{
+    width:14px; height:14px;
+    stroke:var(--text-dim);
+    transition:stroke 0.2s ease;
+  }
+  
+  .paper:hover .paper-icon svg{stroke:var(--accent);}
+  
+  .paper-body{padding:0.5rem 0; flex:1;}
+  
+  .headline{
+    display:flex; gap:0.875rem;
+    padding:0.875rem 1.25rem;
+    text-decoration:none; color:inherit;
+    transition:background 0.15s ease;
+    border-bottom:1px solid rgba(42,42,42,0.5);
+    align-items:flex-start;
+  }
+  
+  .headline:last-child{border-bottom:none;}
+  .headline:hover{background:var(--bg-card-hover);}
+  
+  .headline-num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.7rem; color:var(--text-muted);
+    font-weight:700; line-height:1.5;
+    flex-shrink:0; min-width:1.5rem;
+  }
+  
+  .headline:hover .headline-num{color:var(--accent);}
+  
+  .headline-text{
+    font-size:0.875rem; line-height:1.45;
+    color:var(--text-dim); font-weight:400;
+    transition:color 0.15s ease;
+  }
+  
+  .headline:hover .headline-text{color:var(--text);}
+  
+  .paper-footer{
+    padding:0.875rem 1.25rem;
+    border-top:1px solid var(--border);
+    display:flex; justify-content:space-between;
+    align-items:center; background:var(--bg-elev);
+  }
+  
+  .paper-link{
+    color:var(--accent); text-decoration:none;
+    font-size:0.7rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.12em;
+    display:flex; align-items:center; gap:0.4rem;
+    transition:gap 0.2s ease;
+  }
+  
+  .paper-link:hover{gap:0.6rem;}
+  
+  .paper-link svg{width:12px; height:12px; stroke:currentColor;}
+  
+  .paper-time{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.65rem; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:0.1em;
+  }
+  
+  #section-all .category-block{margin-bottom:3rem;}
+  #section-all .category-block:last-child{margin-bottom:0;}
+  
+  @media (max-width: 768px){
+    .masthead-inner{padding:1rem;}
+    .brand-text h1{font-size:1.25rem;}
+    .live-indicator{display:none;}
+    .hero{padding:2rem 1rem 1.5rem;}
+    .hero-stats{gap:1.25rem;}
+    .stat-number{font-size:1.5rem;}
+    .tabs{padding:0 1rem; top:calc(72px + var(--safe-top));}
+    .tab{padding:0.875rem 1rem; font-size:0.7rem;}
+    main{padding:1.5rem 1rem 3rem;}
+    .papers-grid{grid-template-columns:1fr; gap:1rem;}
+    .refresh-btn{padding:0.5rem 0.7rem; font-size:0.7rem;}
+    .refresh-btn span{display:none;}
+  }
+  
+  footer{
+    border-top:1px solid var(--border);
+    padding:2rem 1.5rem; text-align:center;
+    color:var(--text-muted); font-size:0.75rem;
+    font-family:'JetBrains Mono', monospace;
+    text-transform:uppercase; letter-spacing:0.1em;
+    position:relative; z-index:2;
+  }
+  
+  footer .accent{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <div class="brand-mark"><span>D</span></div>
+      <div class="brand-text">
+        <h1>El Diario</h1>
+        <div class="subtitle">Mis Noticias · Nico</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>EN VIVO</span>
+      </div>
+      <button class="refresh-btn" onclick="location.reload()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 4v5h-5M3 20v-5h5"/><path d="M3.51 9a9 9 0 0114.85-3.36L21 9M21 15a9 9 0 01-14.85 3.36L3 15"/></svg>
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-date" id="heroDate">Cargando fecha...</div>
+  <h2 class="hero-title">Toda tu lectura<br><em>en un solo lugar</em></h2>
+  <p class="hero-subtitle">Tu selección curada de los principales medios nacionales, financieros y regionales de Concordia. Diseñado para informarte mejor, en menos tiempo.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-number">11</div>
+      <div class="stat-label">Diarios</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Categorías</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">44</div>
+      <div class="stat-label">Titulares</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number" id="timeStat">--:--</div>
+      <div class="stat-label">Hora local</div>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab active" data-target="section-all">Todos<span class="tab-count">11</span></button>
+    <button class="tab" data-target="section-nacional">Nacional<span class="tab-count">5</span></button>
+    <button class="tab" data-target="section-financiero">Financiero<span class="tab-count">3</span></button>
+    <button class="tab" data-target="section-concordia">Concordia<span class="tab-count">3</span></button>
+  </div>
+</nav>
+
+<main>
+  <section class="section active" id="section-all">
+    <div class="category-block">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-eyebrow">01 — Cobertura Nacional</div>
+          <h2 class="section-title">Nacional</h2>
+        </div>
+        <div class="section-meta">5 medios</div>
+      </div>
+      <div class="papers-grid" data-cat="nacional"></div>
+    </div>
+    
+    <div class="category-block">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-eyebrow">02 — Mercados & Economía</div>
+          <h2 class="section-title">Financiero <em style="font-style:italic;color:var(--accent);font-weight:400;">& Bolsa</em></h2>
+        </div>
+        <div class="section-meta">3 medios</div>
+      </div>
+      <div class="papers-grid" data-cat="financiero"></div>
+    </div>
+    
+    <div class="category-block">
+      <div class="section-header">
+        <div class="section-title-block">
+          <div class="section-eyebrow">03 — Litoral · Entre Ríos</div>
+          <h2 class="section-title">Concordia</h2>
+        </div>
+        <div class="section-meta">3 medios</div>
+      </div>
+      <div class="papers-grid" data-cat="concordia"></div>
+    </div>
+  </section>
+
+  <section class="section" id="section-nacional">
+    <div class="section-header">
+      <div class="section-title-block">
+        <div class="section-eyebrow">Cobertura Nacional</div>
+        <h2 class="section-title">Diarios Nacionales</h2>
+      </div>
+      <div class="section-meta">5 medios · 20 titulares</div>
+    </div>
+    <div class="papers-grid" data-cat="nacional"></div>
+  </section>
+
+  <section class="section" id="section-financiero">
+    <div class="section-header">
+      <div class="section-title-block">
+        <div class="section-eyebrow">Mercados & Economía</div>
+        <h2 class="section-title">Financiero <em style="font-style:italic;color:var(--accent);font-weight:400;">& Bolsa</em></h2>
+      </div>
+      <div class="section-meta">3 medios · 12 titulares</div>
+    </div>
+    <div class="papers-grid" data-cat="financiero"></div>
+  </section>
+
+  <section class="section" id="section-concordia">
+    <div class="section-header">
+      <div class="section-title-block">
+        <div class="section-eyebrow">Litoral · Entre Ríos</div>
+        <h2 class="section-title">Diarios de Concordia</h2>
+      </div>
+      <div class="section-meta">3 medios · 12 titulares</div>
+    </div>
+    <div class="papers-grid" data-cat="concordia"></div>
+  </section>
+</main>
+
+<footer>
+  <span>El Diario</span> · Dashboard personalizado · <span class="accent">v2.0</span> · <span id="footerYear"></span>
+</footer>
+
+<script>
+  const PAPERS = {
+    nacional: [
+      {name:'Clarín', tag:'Buenos Aires', url:'https://www.clarin.com',
+        headlines:['Política: análisis sobre las últimas medidas económicas del gobierno','Sociedad: cambios en el sistema educativo para 2026','Deportes: Los Pumas se preparan para el próximo torneo','Internacionales: tensiones comerciales entre potencias mundiales']},
+      {name:'La Nación', tag:'Buenos Aires', url:'https://www.lanacion.com.ar',
+        headlines:['Economía: inflación y expectativas para el segundo semestre','Opinión: columna sobre el futuro de la política argentina','Cultura: entrevista exclusiva con director de cine argentino','Tecnología: innovaciones en IA y su impacto local']},
+      {name:'Infobae', tag:'Digital · 24/7', url:'https://www.infobae.com',
+        headlines:['Política: últimas declaraciones de funcionarios del gobierno','Sociedad: tendencias y cambios en la vida cotidiana','Mundo: conflictos internacionales y consecuencias','Espectáculos: novedades del mundo del entretenimiento']},
+      {name:'iProfesional', tag:'Negocios & Profesión', url:'https://www.iprofesional.com',
+        headlines:['Economía: análisis del mercado y perspectivas empresariales','Finanzas: inversiones y estrategias para el ahorro','Tecnología: innovaciones en el ámbito corporativo','Management: tendencias en recursos humanos y liderazgo']},
+      {name:'Buenos Aires Herald', tag:'English Edition', url:'https://buenosairesherald.com',
+        headlines:['Politics: latest developments in Buenos Aires governance','Economy: foreign investment trends in Argentina','Culture: Buenos Aires art scene highlights','Sports: local rugby teams compete internationally']}
+    ],
+    financiero: [
+      {name:'Ámbito Financiero', tag:'Mercados Argentina', url:'https://www.ambito.com',
+        headlines:['Dólar: cotizaciones y análisis del mercado cambiario','Bolsa: el índice Merval cierra con ganancias','Bonos: riesgo país y perspectivas de inversión','Empresas: resultados trimestrales de principales compañías']},
+      {name:'Bloomberg', tag:'Global Markets', url:'https://www.bloomberg.com',
+        headlines:['Markets: global stock indices reach new heights','Commodities: oil prices stabilize amid demand concerns','Tech: AI companies lead market performance','Emerging Markets: Argentina\'s economic outlook improves']},
+      {name:'Financial Times', tag:'World Finance', url:'https://www.ft.com',
+        headlines:['Banking: central banks signal policy shifts','Investment: private equity trends in Latin America','Analysis: global economic growth forecasts revised','Companies: corporate earnings season highlights']}
+    ],
+    concordia: [
+      {name:'Diario Río Uruguay', tag:'Concordia · ER', url:'https://www.diarioriouruguay.com.ar',
+        headlines:['Locales: novedades sobre obras públicas en Concordia','Economía: actividad comercial en la región','Sociedad: eventos culturales del fin de semana','Deportes: resultados de ligas locales']},
+      {name:'Concordia Policiales', tag:'Seguridad Local', url:'https://concordiapoliciales.com.ar',
+        headlines:['Seguridad: operativos de prevención en la ciudad','Justicia: avances en investigaciones locales','Accidentes: situación del tránsito en rutas regionales','Comunidad: campañas de prevención ciudadana']},
+      {name:'Diario Junio', tag:'Concordia · ER', url:'https://www.diariojunio.com.ar',
+        headlines:['Política: sesiones del Concejo Deliberante','Salud: novedades del sistema sanitario local','Educación: actividades en escuelas de Concordia','Turismo: propuestas para el Parque San Carlos']}
+    ]
+  };
+
+  function renderPaper(p) {
+    const headlines = p.headlines.map((h, i) => `
+      <a class="headline" href="${p.url}" target="_blank" rel="noopener">
+        <span class="headline-num">0${i+1}</span>
+        <span class="headline-text">${h}</span>
+      </a>
+    `).join('');
+    
+    return `
+      <article class="paper">
+        <div class="paper-header">
+          <div class="paper-name-block">
+            <h3 class="paper-name">${p.name}</h3>
+            <span class="paper-tag">${p.tag}</span>
+          </div>
+          <div class="paper-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/>
+              <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="paper-body">${headlines}</div>
+        <div class="paper-footer">
+          <a class="paper-link" href="${p.url}" target="_blank" rel="noopener">
+            Ir al sitio
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <span class="paper-time">${getTime()}</span>
+        </div>
+      </article>
+    `;
+  }
+  
+  function renderAll() {
+    document.querySelectorAll('.papers-grid').forEach(grid => {
+      const cat = grid.dataset.cat;
+      grid.innerHTML = PAPERS[cat].map(renderPaper).join('');
+    });
+  }
+  
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  
+  function getTime() {
+    return new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+  
+  function updateDateTime() {
+    const now = new Date();
+    const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const formatted = now.toLocaleDateString('es-AR', opts);
+    document.getElementById('heroDate').textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    document.getElementById('timeStat').textContent = getTime();
+    document.getElementById('footerYear').textContent = now.getFullYear();
+  }
+  
+  renderAll();
+  updateDateTime();
+  setInterval(updateDateTime, 30000);
+</script>
+
+</body>
+</html>
